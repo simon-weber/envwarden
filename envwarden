@@ -1,5 +1,7 @@
 #!/bin/bash
 
+FOLDER_ID=b3ebe16f-52ad-4f44-89d6-ac39017ef692
+
 SEARCH=envwarden
 
 usage()
@@ -85,14 +87,14 @@ while read -r key; do
         quoted_value="$(echo "$value" | sed "s/'/'\"'\"'/g")"
         echo export \'$quoted_key\'=\'$quoted_value\'
     fi
-done < <(bw list items --search "$SEARCH" |jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
+done < <(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
 
 if [[ -n "$COPY_TO" ]]; then
-    item_id=$(bw list items --search "$SEARCH" |jq -r '.[].id')
+    item_id=$(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].id')
     if [[ -n "$item_id" ]]; then
         while read -r attachment_id; do
             read -r filename
             bw get attachment $attachment_id --itemid $item_id --output "$COPY_TO/$filename" 1>&2
-        done < <(bw list items --search "$SEARCH" |jq -r '.[].attachments[] | .id, .fileName')
+        done < <(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].attachments[] | .id, .fileName')
     fi
 fi
