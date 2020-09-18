@@ -60,6 +60,8 @@ while [[ $# > 0 ]]; do
     shift
 done
 
+bw_hits="$(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH")"
+
 while read -r key; do
     read -r value
     if [[ -n "$DOTENV" ]]; then
@@ -73,7 +75,12 @@ while read -r key; do
         quoted_value="$(echo "$value" | sed "s/'/'\"'\"'/g")"
         echo export \'$quoted_key\'=\'$quoted_value\'
     fi
-done < <(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
+done < <(echo "$bw_hits"|jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
+
+notes="$(echo "$bw_hits"|jq -r '.[].notes')"
+if [[ -n "$notes" && "$notes" != "null" ]]; then
+  echo "$(echo "$notes" | grep -v '^#' | sed 's/^/export /')"
+fi
 
 if [[ -n "$COPY_TO" ]]; then
     item_id=$(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].id')
