@@ -65,9 +65,11 @@ bw_hits="$(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH")"
 while read -r key; do
     read -r value
     if [[ -n "$DOTENV" ]]; then
-        echo $key=\"$value\"
+        # echo $key=\"$value\"
+        exit 1
     elif [[ -n "$DOTENV_DOCKER" ]]; then
-        echo $key=$value
+        # echo $key=$value
+        exit 1
     else
         # wrap keys and values in single quotes to avoid further interpolation,
         # plus sanitize for single quote symbols to avoid command injection
