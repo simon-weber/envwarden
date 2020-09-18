@@ -73,14 +73,14 @@ while read -r key; do
         quoted_value="$(echo "$value" | sed "s/'/'\"'\"'/g")"
         echo export \'$quoted_key\'=\'$quoted_value\'
     fi
-done < <(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
+done < <(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].fields[]? | select(.name != null) | select(.value != null) | .name, .value')
 
 if [[ -n "$COPY_TO" ]]; then
-    item_id=$(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].id')
+    item_id=$(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].id')
     if [[ -n "$item_id" ]]; then
         while read -r attachment_id; do
             read -r filename
-            bw get attachment $attachment_id --itemid $item_id --output "$COPY_TO/$filename" 1>&2
-        done < <(bw list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].attachments[] | .id, .fileName')
+            bw-session get attachment $attachment_id --itemid $item_id --output "$COPY_TO/$filename" 1>&2
+        done < <(bw-session list items --folderid "$FOLDER_ID" --search "$SEARCH" |jq -r '.[].attachments[] | .id, .fileName')
     fi
 fi
